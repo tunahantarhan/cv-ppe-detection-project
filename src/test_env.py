@@ -20,7 +20,7 @@ while cap.isOpened():
     # frame'leme yapılır
     annotated_frame = results[0].plot()
 
-    cv2.imshow("YOLOv8 Test Ekranı", annotated_frame)
+    cv2.imshow("YOLOv8 Test Ekrani", annotated_frame)
 
     # kapatmak için klavyeden "q" tuşuna basılır
     if cv2.waitKey(1) & 0xFF == ord('q'):
