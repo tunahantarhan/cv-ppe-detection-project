@@ -5,6 +5,17 @@
 MODEL_PATH = "weights/best.pt"
 CONFIDENCE_THRESHOLD = 0.25
 
+# Düşük performanslı sınıflar → daha düşük threshold
+# Yüksek performanslı sınıflar → daha yüksek threshold
+CLASS_CONFIDENCE_THRESHOLDS: dict[str, float] = {
+    "Fall-Detected":   0.15,
+    "NO-Safety Vest":  0.18,
+    "NO-Mask":         0.20,
+    "NO-Hardhat":      0.22,
+    "NO-Goggles":      0.25,
+    "NO-Gloves":       0.28,
+}
+
 # --- İhlal Sınıfları ---
 TARGET_VIOLATIONS = {
     "NO-Hardhat",
