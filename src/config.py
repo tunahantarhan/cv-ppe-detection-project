@@ -3,17 +3,14 @@
 
 # --- Model ---
 MODEL_PATH = "weights/best.pt"
-CONFIDENCE_THRESHOLD = 0.25
+CONFIDENCE_THRESHOLD = 0.25  # Person ve genel şeyler için taban
 
-# Düşük performanslı sınıflar → daha düşük threshold
-# Yüksek performanslı sınıflar → daha yüksek threshold
 CLASS_CONFIDENCE_THRESHOLDS: dict[str, float] = {
-    "Fall-Detected":   0.15,
-    "NO-Safety Vest":  0.18,
-    "NO-Mask":         0.20,
-    "NO-Hardhat":      0.22,
-    "NO-Goggles":      0.25,
-    "NO-Gloves":       0.28,
+    "NO-Safety Vest":  0.22,
+    "NO-Mask":         0.28,
+    "NO-Hardhat":      0.28,
+    "NO-Goggles":      0.18,  
+    "NO-Gloves":       0.18,
 }
 
 # --- İhlal Sınıfları ---
@@ -23,7 +20,6 @@ TARGET_VIOLATIONS = {
     "NO-Mask",
     "NO-Gloves",
     "NO-Goggles",
-    "Fall-Detected",
 }
 
 # --- Cooldown ---
