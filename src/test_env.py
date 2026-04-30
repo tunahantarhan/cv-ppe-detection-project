@@ -20,6 +20,7 @@ from config import (
     SCREENSHOTS_DIR,
 )
 from ultralytics import YOLO
+from rules import ViolationEvaluator  # Kural motoru
 
 WINDOW_TITLE = "ISG Debug Ekrani  |  q: cikis  |  s: screenshot"
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -111,11 +112,14 @@ def main() -> None:
 
     print("Model yükleniyor...")
     model = YOLO(MODEL_PATH)
+    evaluator = ViolationEvaluator()  # Kural motoru
     print("Model yüklendi.\n")
 
-    cap = cv2.VideoCapture(CAMERA_INDEX)
+    video_path = "test_videos/test_video_03.mov"
+    cap = cv2.VideoCapture(video_path)
+    
     if not cap.isOpened():
-        print(f"HATA: Kamera açılamadı (index: {CAMERA_INDEX})")
+        print(f"HATA: Video dosyası açılamadı: {video_path}")
         sys.exit(1)
 
     os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
@@ -131,33 +135,54 @@ def main() -> None:
             print("Frame okunamadı.")
             break
 
-        min_threshold = min(CLASS_CONFIDENCE_THRESHOLDS.values(), default=CONFIDENCE_THRESHOLD)
-        results = model(frame, conf=min_threshold, imgsz=640, verbose=False)
-        
-        detections: list[tuple[str, float]] = []
+        results = model(frame, conf=0.15, imgsz=640, verbose=False)
+
+        raw_detections = []
+        detected_classes_only = []
+        person_confidence = 0.0
+
         for r in results:
             for conf_tensor, cls_tensor in zip(r.boxes.conf, r.boxes.cls):
                 class_name = model.names[int(cls_tensor)]
                 confidence = float(conf_tensor)
-                threshold = CLASS_CONFIDENCE_THRESHOLDS.get(class_name, CONFIDENCE_THRESHOLD)
-                if confidence >= threshold:
-                    detections.append((class_name, confidence))
+                
+                # Modelin bulduğu her şey listeye atılır 
+                detected_classes_only.append(class_name)
+                
+                if class_name == "Person":
+                    person_confidence = max(person_confidence, confidence) # En yüksek güven alınır
+                    
+                # Flickering indirgeme adına sadece güvenilir tespitler ham listeye atılır
+                if not class_name.startswith("NO-") and confidence >= 0.35:
+                    raw_detections.append((class_name, confidence))
 
-        # Confidence'a göre sıralanır (yüksekten düşüğe)
-        detections.sort(key=lambda x: x[1], reverse=True)
+        # Terminale saniyede 10 kere modelin ne gördüğü yazılarak debug yapılır
+        print(f"GÖZÜKENLER: {detected_classes_only}")
+
+        # Kural motoru çalıştırılır
+        logical_violations = evaluator.evaluate(detected_classes_only)
+
+        # Bulunan mantıksal ihlaller (NO-Mask, NO-Hardhat) ana panele eklenir
+        # Güven skoru olarak person_confidence kullanılır, eğer person yoksa 0.99 gözükür
+        final_panel_detections = list(raw_detections)
+        for lv in logical_violations:
+            final_panel_detections.append((lv, person_confidence if person_confidence > 0 else 0.99))
+
+        # Confidence'a göre sıralanır
+        final_panel_detections.sort(key=lambda x: x[1], reverse=True)
 
         annotated = results[0].plot()
 
-        # FPS hesaplanır
+        # FPS ve ana panel çizilir
         current_time = time.time()
         fps = 1.0 / (current_time - prev_time + 1e-6)
         prev_time = current_time
 
         draw_fps(annotated, fps)
-        draw_detection_panel(annotated, detections)
+        draw_detection_panel(annotated, final_panel_detections)
 
         # İhlal varsa üstte kırmızı bant gösterilir
-        active_violations = [d for d in detections if d[0] in TARGET_VIOLATIONS]
+        active_violations = [d for d in final_panel_detections if d[0] in TARGET_VIOLATIONS]
         if active_violations:
             cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 5), COLOR_VIOLATION, -1)
 
@@ -171,7 +196,7 @@ def main() -> None:
         elif key == ord("s"):
             path = save_screenshot(annotated)
             print(f"Ekran görüntüsü kaydedildi: {path}")
-
+                        
     cap.release()
     cv2.destroyAllWindows()
 
