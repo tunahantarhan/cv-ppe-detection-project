@@ -132,8 +132,8 @@ def main() -> None:
             break
 
         min_threshold = min(CLASS_CONFIDENCE_THRESHOLDS.values(), default=CONFIDENCE_THRESHOLD)
-        results = model(frame, conf=min_threshold, verbose=False)
-
+        results = model(frame, conf=min_threshold, imgsz=640, verbose=False)
+        
         detections: list[tuple[str, float]] = []
         for r in results:
             for conf_tensor, cls_tensor in zip(r.boxes.conf, r.boxes.cls):

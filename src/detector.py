@@ -15,7 +15,7 @@ class ViolationDetector:
 
     # Frame üzerinde ihlal tespiti yapar ve box çizilir.
     def detect(self, frame: np.ndarray) -> tuple[list[str], np.ndarray]:
-        results = self.model(frame, conf=CONFIDENCE_THRESHOLD, verbose=False)
+        results = self.model(frame, conf=CONFIDENCE_THRESHOLD, imgsz=640, verbose=False)
 
         violations = []
         for r in results:
