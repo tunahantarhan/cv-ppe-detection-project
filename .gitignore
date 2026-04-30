@@ -5,4 +5,5 @@ data/
 weights/
 outputs/
 runs/
+test_videos/
 *.pt
