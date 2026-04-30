@@ -17,12 +17,15 @@ class ViolationDetector:
     def detect(self, frame: np.ndarray) -> tuple[list[str], np.ndarray]:
         results = self.model(frame, conf=CONFIDENCE_THRESHOLD, imgsz=640, verbose=False)
 
-        violations = []
+        # Modelin ekranda gördüğü her şey listelenir (Person, Hardhat, Mask vb.)
+        detected_classes = []
         for r in results:
             for c in r.boxes.cls:
                 class_name = self.model.names[int(c)]
-                if class_name in TARGET_VIOLATIONS:
-                    violations.append(class_name)
+                detected_classes.append(class_name)
 
+        # Çizilmiş kare alınır
         annotated_frame = results[0].plot()
-        return violations, annotated_frame
+        
+        # Görünen ham sınıflar ve resim döndürülür
+        return detected_classes, annotated_frame
