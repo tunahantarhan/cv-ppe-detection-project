@@ -10,7 +10,7 @@ from detector import ViolationDetector
 from violation_tracker import ViolationTracker
 from logger import ViolationLogger
 from config import WINDOW_TITLE
-
+from rules import ViolationEvaluator
 
 def main() -> None:
     # Sistem başlatılır, her sorumluluk ilgili modüllere devredilir.
@@ -19,6 +19,7 @@ def main() -> None:
     detector = ViolationDetector()
     tracker = ViolationTracker()
     logger = ViolationLogger()
+    evaluator = ViolationEvaluator() # Kural motoru
 
     try:
         with Camera() as camera:
@@ -29,9 +30,16 @@ def main() -> None:
                     print("Frame okunamadı, döngü sonlandırılıyor.")
                     break
 
-                violations, annotated_frame = detector.detect(frame)
+                # 1: Görüntüden ham nesneleri bul
+                raw_classes, annotated_frame = detector.detect(frame)
+                
+                # 2: İş kurallarını işlet ve gerçek ihlalleri bul
+                violations = evaluator.evaluate(raw_classes)
+                
+                # 3: İhlalleri takip et (Zamanlama/Debounce)
                 should_log, gathered, best_frame = tracker.update(violations, annotated_frame)
 
+                # 4: Gerekirse veritabanına/CSV'ye yaz
                 if should_log:
                     logger.log(gathered, best_frame)
 
@@ -44,7 +52,6 @@ def main() -> None:
     except RuntimeError as e:
         print(f"HATA: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
