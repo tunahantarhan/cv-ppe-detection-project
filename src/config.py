@@ -60,3 +60,21 @@ LOG_FILE = "outputs/violations_log.csv"
 # --- Kamera ---
 CAMERA_INDEX = 0
 WINDOW_TITLE = "ISG Denetim Kamerasi"
+
+# --- Class Renkleri ---
+CLASS_COLORS: dict[int, tuple[int, int, int]] = {
+    0: (255, 0, 0),      # Dusme - Mavi
+    1: (0, 255, 255),    # Eldiven - Cyan
+    2: (255, 255, 0),    # Gozluk - Mavi-Sarı
+    3: (0, 255, 0),      # Kask - Yeşil
+    4: (255, 0, 255),    # Merdiven - Magenta
+    5: (200, 100, 255),  # Maske - Pembe
+    6: (0, 0, 255),      # NO-Eldiven - Kırmızı
+    7: (0, 100, 255),    # NO-Gozluk - Turuncu
+    8: (0, 165, 255),    # NO-Kask - Turuncu
+    9: (0, 128, 255),    # NO-Maske - Turuncu Açık
+    10: (128, 0, 255),   # NO-Is-Yelegi - Mor
+    11: (100, 100, 100), # Insan - Gri
+    12: (100, 200, 255), # Guvenlik-Konisi - Sarı Açık
+    13: (200, 200, 0),   # Is-Yelegi - Cyan Açık
+}
