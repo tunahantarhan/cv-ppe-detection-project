@@ -18,6 +18,8 @@ from config import (
     TARGET_VIOLATIONS,
     CAMERA_INDEX,
     SCREENSHOTS_DIR,
+    CLASS_NAMES,
+    CLASS_COLORS,
 )
 from ultralytics import YOLO
 from rules import ViolationEvaluator  # Kural motoru
@@ -32,9 +34,14 @@ COLOR_OVERLAY_BG = (20, 20, 20)    # koyu panel arka planı
 COLOR_WHITE = (255, 255, 255)
 COLOR_YELLOW = (0, 220, 220)
 
+# --- Video / Kamera Seçimi ---
+# Bir video dosyası test etmek için VIDEO_SOURCE dolu bırakılır
+# Kameraya dönmek için "None" yapılır.
+VIDEO_SOURCE: str | None = "test_videos/test_video_02.mov"  # örn: "test_videos/test_video_03.mov"
+
 # Fps değerleri yazılır
 def draw_fps(frame: np.ndarray, fps: float) -> None:
-    cv2.putText(frame, f"FPS: {fps:.1f}", (10, 28),
+    cv2.putText(frame, f"FPS: {fps:.1f}", (30, 58),
                 FONT, 0.7, COLOR_YELLOW, 2, cv2.LINE_AA)
 
 # Tespit sonuçlarını sağ üst köşede gösteren panel eklenir
@@ -50,21 +57,20 @@ def draw_detection_panel(
     row_height = 28
     panel_h = row_height * len(detections) + 16
     panel_w = 270
-
+    
     overlay = frame.copy()
     cv2.rectangle(overlay,
                   (panel_x - 8, panel_y),
                   (panel_x + panel_w, panel_y + panel_h),
                   COLOR_OVERLAY_BG, -1)
-    cv2.addWeighted(overlay, 0.6, frame, 0.2, 0, frame)
+    cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
 
     for i, (class_name, conf) in enumerate(detections):
         y = panel_y + 18 + i * row_height
         is_violation = class_name in TARGET_VIOLATIONS
         color = COLOR_VIOLATION if is_violation else COLOR_SAFE
 
-        label = f"{class_name}"
-        cv2.putText(frame, label, (panel_x, y),
+        cv2.putText(frame, class_name, (panel_x, y),
                     FONT, 0.52, color, 1, cv2.LINE_AA)
 
         # Confidence bar (arka plan)
@@ -89,105 +95,119 @@ def draw_detection_panel(
                     FONT, 0.48, COLOR_WHITE, 1, cv2.LINE_AA)
 
 
-def draw_threshold_info(frame: np.ndarray, class_name: str, conf: float) -> None:
-    threshold = CLASS_CONFIDENCE_THRESHOLDS.get(class_name, CONFIDENCE_THRESHOLD)
-    margin = conf - threshold
-    return margin
-
-
 def save_screenshot(frame: np.ndarray) -> str:
     os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     path = f"{SCREENSHOTS_DIR}/debug_{timestamp}.jpg"
     cv2.imwrite(path, frame)
     return path
-
-
+ 
+ 
 def main() -> None:
     print("=" * 50)
     print("ISG Debug Aracı Başlatılıyor")
-    print(f"Model:  {MODEL_PATH}")
-    print(f"Kamera: index {CAMERA_INDEX}")
+    print(f"Model: {MODEL_PATH}")
+    print(f"Kaynak: {VIDEO_SOURCE if VIDEO_SOURCE else f'Kamera (index {CAMERA_INDEX})'}")
     print("=" * 50)
-
+ 
     print("Model yükleniyor...")
     model = YOLO(MODEL_PATH)
     evaluator = ViolationEvaluator()  # Kural motoru
     print("Model yüklendi.\n")
-
-    video_path = "test_videos/test_video_03.mov"
-    cap = cv2.VideoCapture(video_path)
     
+    source = VIDEO_SOURCE if VIDEO_SOURCE else CAMERA_INDEX
+    cap = cv2.VideoCapture(source)
+ 
     if not cap.isOpened():
-        print(f"HATA: Video dosyası açılamadı: {video_path}")
+        print(f"HATA: Kaynak açılamadı: {source}")
         sys.exit(1)
-
-    os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
-
+ 
+    min_threshold = min(
+        CLASS_CONFIDENCE_THRESHOLDS.values(),
+        default=CONFIDENCE_THRESHOLD,
+    )
+ 
     prev_time = time.time()
-    fps = 0.0
-
     print("Sistem aktif. q: çıkış | s: ekran görüntüsü")
-
+     
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Frame okunamadı.")
+            print("Kaynak / frame okunamadı.")
             break
-
-        results = model(frame, conf=0.15, imgsz=640, verbose=False)
-
-        raw_detections = []
-        detected_classes_only = []
-        person_confidence = 0.0
-
+ 
+        results = model(frame, conf=min_threshold, imgsz=640, verbose=False)
+ 
+        raw_classes: list[str]               = []
+        panel_detections: list[tuple[str, float]] = []
+        person_conf = 0.0
+ 
         for r in results:
             for conf_tensor, cls_tensor in zip(r.boxes.conf, r.boxes.cls):
-                class_name = model.names[int(cls_tensor)]
+                class_id = int(cls_tensor)
+                class_name_en = model.names[class_id]  # İngilizce sınıf adları
                 confidence = float(conf_tensor)
+                threshold  = CLASS_CONFIDENCE_THRESHOLDS.get(class_name_en, CONFIDENCE_THRESHOLD)
+
+                if confidence < threshold:
+                    continue
+
+                raw_classes.append(class_name_en)  # İngilizce raw_classes'a
+
+                if class_name_en == "Person":
+                    person_conf = max(person_conf, confidence)
+
+                # Türkçe display'e
+                class_name_tr = CLASS_NAMES.get(class_id, class_name_en)
+                if class_name_en not in TARGET_VIOLATIONS:
+                    panel_detections.append((class_name_tr, confidence))
+ 
+        # --- Heuristic kural motoru ---
+        # Mantıksal ihlaller hesaplanır
+        EN_TO_TR_VIOLATIONS = {
+            "NO-Hardhat": "IHLAL | Kask",
+            "NO-Mask": "IHLAL | Maske",
+            "NO-Gloves": "IHLAL | Eldiven",
+            "NO-Goggles": "IHLAL | Gozluk",
+            "NO-Safety Vest": "IHLAL | Is-Yelegi",
+        }
+        
+        logical_violations = evaluator.evaluate(raw_classes)
+        for violation in logical_violations:
+            violation_tr = EN_TO_TR_VIOLATIONS.get(violation, violation)  # Türkçeye çevir
+            panel_detections.append(
+                (violation_tr, person_conf if person_conf > 0 else 0.99)
+            )
+ 
+        panel_detections.sort(key=lambda x: x[1], reverse=True)
+        
+        annotated = frame.copy()
+        for r in results:
+            for box, conf, cls in zip(r.boxes.xyxy, r.boxes.conf, r.boxes.cls):
+                class_id = int(cls)
+                class_name_tr = CLASS_NAMES.get(class_id, model.names[class_id])
+                confidence = float(conf)
+                color = CLASS_COLORS.get(class_id, (0, 255, 0))  # Default yeşil
                 
-                # Modelin bulduğu her şey listeye atılır 
-                detected_classes_only.append(class_name)
-                
-                if class_name == "Person":
-                    person_confidence = max(person_confidence, confidence) # En yüksek güven alınır
-                    
-                # Flickering indirgeme adına sadece güvenilir tespitler ham listeye atılır
-                if not class_name.startswith("NO-") and confidence >= 0.35:
-                    raw_detections.append((class_name, confidence))
-
-        # Terminale saniyede 10 kere modelin ne gördüğü yazılarak debug yapılır
-        print(f"GÖZÜKENLER: {detected_classes_only}")
-
-        # Kural motoru çalıştırılır
-        logical_violations = evaluator.evaluate(detected_classes_only)
-
-        # Bulunan mantıksal ihlaller (NO-Mask, NO-Hardhat) ana panele eklenir
-        # Güven skoru olarak person_confidence kullanılır, eğer person yoksa 0.99 gözükür
-        final_panel_detections = list(raw_detections)
-        for lv in logical_violations:
-            final_panel_detections.append((lv, person_confidence if person_confidence > 0 else 0.99))
-
-        # Confidence'a göre sıralanır
-        final_panel_detections.sort(key=lambda x: x[1], reverse=True)
-
-        annotated = results[0].plot()
-
+                x1, y1, x2, y2 = map(int, box)
+                cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(annotated, f"{class_name_tr} {confidence:.2f}", 
+                            (x1, y1 - 10), FONT, 0.5, color, 2)
+ 
         # FPS ve ana panel çizilir
         current_time = time.time()
         fps = 1.0 / (current_time - prev_time + 1e-6)
         prev_time = current_time
-
+ 
         draw_fps(annotated, fps)
-        draw_detection_panel(annotated, final_panel_detections)
-
+        draw_detection_panel(annotated, panel_detections)
+ 
         # İhlal varsa üstte kırmızı bant gösterilir
-        active_violations = [d for d in final_panel_detections if d[0] in TARGET_VIOLATIONS]
-        if active_violations:
+        if logical_violations:
             cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 5), COLOR_VIOLATION, -1)
-
+ 
         cv2.imshow(WINDOW_TITLE, annotated)
-
+ 
         # --- Klavye kısayolları ---
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
@@ -196,10 +216,10 @@ def main() -> None:
         elif key == ord("s"):
             path = save_screenshot(annotated)
             print(f"Ekran görüntüsü kaydedildi: {path}")
-                        
+ 
     cap.release()
     cv2.destroyAllWindows()
-
-
+ 
+ 
 if __name__ == "__main__":
     main()
