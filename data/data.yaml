@@ -1,0 +1,15 @@
+names:
+- Hardhat
+- NO-Hardhat
+- NO-Safety Vest
+- Safety Vest
+nc: 4
+roboflow:
+  license: CC BY 4.0
+  project: cv-ppe-detection-npbbf
+  url: https://universe.roboflow.com/tunahans-workspace-9glcc/cv-ppe-detection-npbbf/dataset/1
+  version: 1
+  workspace: tunahans-workspace-9glcc
+test: ../test/images
+train: ../train/images
+val: ../valid/images
