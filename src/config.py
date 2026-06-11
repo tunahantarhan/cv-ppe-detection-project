@@ -14,8 +14,8 @@ CLASS_CONFIDENCE_THRESHOLDS: dict[str, float] = {
 CLASS_NAMES = {
     0: 'Baret',
     1: 'IHLAL | Baret Yok',
-    2: 'Is-Yelegi',
-    3: 'IHLAL | Is-Yelegi Yok'
+    2: 'IHLAL | Is Yelegi Yok',
+    3: 'Is Yelegi',
 }
 
 # --- İHLAL SINIFLARI ---
@@ -26,10 +26,10 @@ TARGET_VIOLATIONS = {
 
 # --- CLASS RENKLERİ ---
 CLASS_COLORS: dict[int, tuple[int, int, int]] = {
-    0: (0, 200, 0),      # Hardhat -> Yeşil
-    1: (0, 0, 220),      # NO-Hardhat -> Kırmızı
-    2: (0, 200, 200),    # Safety Vest -> Cyan
-    3: (220, 0, 220),    # NO-Safety Vest -> Mor
+    0: (0, 200, 0),      # Hardhat - Yeşil (Güvenli)
+    1: (0, 0, 220),      # NO-Hardhat - Kırmızı (İhlal)
+    2: (0, 200, 200),    # NO-Safety Vest - Sarı (İhlal)
+    3: (220, 0, 220),    # Safety Vest -  Mor (Güvenli)
 }
 
 # --- COOLDOWN VE ÇIKTI ---
