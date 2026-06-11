@@ -1,80 +1,44 @@
-# Sistem Konfigürasyonu:
-# Bir değer değiştirmek için kullanılacak tek yer/dosya.
+import os
 
-# --- Model ---
 MODEL_PATH = "weights/best.pt"
-CONFIDENCE_THRESHOLD = 0.20  # Person ve genel şeyler için taban
+CONFIDENCE_THRESHOLD = 0.50
 
 CLASS_CONFIDENCE_THRESHOLDS: dict[str, float] = {
-    "Gloves":          0.25,
-    "Goggles":         0.30,
-    "Mask":            0.28,
-    "NO-Safety Vest":  0.18,
-    "NO-Mask":         0.22,
-    "NO-Hardhat":      0.22,
-    "NO-Goggles":      0.20,  
-    "NO-Gloves":       0.20,
+    "Hardhat":         0.50,
+    "Safety Vest":     0.50,
+    "NO-Hardhat":      0.50,
+    "NO-Safety Vest":  0.50,
 }
 
-# --- Türkçe Class İsimleri ---
+# --- EKRANDA GÖZÜKECEK TÜRKÇE SINIF İSİMLERİ ---
 CLASS_NAMES = {
-    0: 'Dusme-Algilandi',
-    1: 'Eldiven',
-    2: 'Gozluk',
-    3: 'Kask',
-    4: 'Merdiven',
-    5: 'Maske',
-    6: 'IHLAL | Eldiven',
-    7: 'IHLAL | Gozluk',
-    8: 'IHLAL | Kask',
-    9: 'IHLAL | Maske',
-    10: 'IHLAL | Is-Yelegi',
-    11: 'Insan',
-    12: 'Guvenlik-Konisi',
-    13: 'Is-Yelegi'
+    0: 'Baret',
+    1: 'IHLAL | Baret Yok',
+    2: 'Is-Yelegi',
+    3: 'IHLAL | Is-Yelegi Yok'
 }
 
-# --- İhlal Sınıfları (Türkçe isimleri de kabul eder) ---
+# --- İHLAL SINIFLARI ---
 TARGET_VIOLATIONS = {
     "NO-Hardhat",
-    "IHLAL | Kask",
-    "NO-Safety Vest",
-    "IHLAL | Is-Yelegi",
-    "NO-Mask",
-    "IHLAL | Maske",
-    "NO-Gloves",
-    "IHLAL | Eldiven",
-    "NO-Goggles",
-    "IHLAL | Gozluk",
+    "NO-Safety Vest"
 }
 
-# --- Cooldown ---
-COLLECTION_WINDOW = 3   # ihlal sonrası ek ihlallerin toplanma süresi
-COOLDOWN_TIME = 10      # bir log grubundan sonra yeni tespite kadar bekleme
+# --- CLASS RENKLERİ ---
+CLASS_COLORS: dict[int, tuple[int, int, int]] = {
+    0: (0, 200, 0),      # Hardhat -> Yeşil
+    1: (0, 0, 220),      # NO-Hardhat -> Kırmızı
+    2: (0, 200, 200),    # Safety Vest -> Cyan
+    3: (220, 0, 220),    # NO-Safety Vest -> Mor
+}
 
-# --- Çıktı Yolları ---
+# --- COOLDOWN VE ÇIKTI ---
+COLLECTION_WINDOW = 3   
+COOLDOWN_TIME = 10
+
 OUTPUT_DIR = "outputs"
 SCREENSHOTS_DIR = "outputs/screenshots"
 LOG_FILE = "outputs/violations_log.csv"
 
-# --- Kamera ---
 CAMERA_INDEX = 0
 WINDOW_TITLE = "ISG Denetim Kamerasi"
-
-# --- Class Renkleri ---
-CLASS_COLORS: dict[int, tuple[int, int, int]] = {
-    0: (255, 0, 0),      # Dusme - Mavi
-    1: (0, 255, 255),    # Eldiven - Cyan
-    2: (255, 255, 0),    # Gozluk - Mavi-Sarı
-    3: (0, 255, 0),      # Kask - Yeşil
-    4: (255, 0, 255),    # Merdiven - Magenta
-    5: (200, 100, 255),  # Maske - Pembe
-    6: (0, 0, 255),      # NO-Eldiven - Kırmızı
-    7: (0, 100, 255),    # NO-Gozluk - Turuncu
-    8: (0, 165, 255),    # NO-Kask - Turuncu
-    9: (0, 128, 255),    # NO-Maske - Turuncu Açık
-    10: (128, 0, 255),   # NO-Is-Yelegi - Mor
-    11: (100, 100, 100), # Insan - Gri
-    12: (100, 200, 255), # Guvenlik-Konisi - Sarı Açık
-    13: (200, 200, 0),   # Is-Yelegi - Cyan Açık
-}
