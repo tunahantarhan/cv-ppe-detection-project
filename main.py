@@ -19,7 +19,7 @@ def main() -> None:
     detector = ViolationDetector()
     tracker = ViolationTracker()
     logger = ViolationLogger()
-    evaluator = ViolationEvaluator() # Kural motoru
+    evaluator = ViolationEvaluator() # kural motoru
 
     try:
         with Camera() as camera:
@@ -30,16 +30,16 @@ def main() -> None:
                     print("Frame okunamadı, döngü sonlandırılıyor.")
                     break
 
-                # 1: Görüntüden ham nesneleri bul
+                # 1) Görüntü üzerinden ham nesneler bulunur
                 raw_classes, annotated_frame = detector.detect(frame)
                 
-                # 2: İş kurallarını işlet ve gerçek ihlalleri bul
+                # 2) Kural motoru, ham nesneleri alır ve ihlalleri değerlendirir
                 violations = evaluator.evaluate(raw_classes)
                 
-                # 3: İhlalleri takip et (Zamanlama/Debounce)
+                # 3) İhlaller takip edilir (Slidin Window / Debounce mantığı)
                 should_log, gathered, best_frame = tracker.update(violations, annotated_frame)
 
-                # 4: Gerekirse veritabanına/CSV'ye yaz
+                # 4) İhlal varsa loglanır, veritabanına ve csv'ye yazılır, kanıt görseli kaydedilir 
                 if should_log:
                     logger.log(gathered, best_frame)
 
