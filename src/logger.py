@@ -1,7 +1,3 @@
-# Loglama Fonksiyonu:
-# Tespit edilen ihlalleri kaydeder.
-# Tek sorumluluğu veriyi CSV'ye, ekran görüntüsünü dosyaya yazmak.
-
 import os
 import cv2
 import numpy as np
@@ -13,8 +9,6 @@ from config import SCREENSHOTS_DIR, LOG_FILE
 class ViolationLogger:
     def __init__(self):
         os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
-        # Header yazılıp yazılmadığı kontrol edilir.
-        self._header_written: bool = os.path.isfile(LOG_FILE) and os.path.getsize(LOG_FILE) > 0
 
     def log(self, violations: set[str], frame: np.ndarray | None) -> None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -30,15 +24,18 @@ class ViolationLogger:
         return img_path
 
     def _write_csv(self, violation_string: str, img_path: str, timestamp: str) -> None:
+        # runtime kontrolü: cold start (dosya ve içerik var mı?)
+        needs_header = not os.path.isfile(LOG_FILE) or os.path.getsize(LOG_FILE) == 0
+        
         new_row = pd.DataFrame({
             "Tarih_Saat": [datetime.strptime(timestamp, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S")],
             "Ihlal_Turu": [violation_string],
             "Kanit_Dosyasi": [img_path],
         })
+        
         new_row.to_csv(
             LOG_FILE,
             mode="a",
-            header=not self._header_written,
+            header=needs_header,
             index=False,
         )
-        self._header_written = True
