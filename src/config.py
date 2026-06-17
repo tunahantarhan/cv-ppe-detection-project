@@ -1,13 +1,13 @@
 import os
 
 MODEL_PATH = "weights/best.pt"
-CONFIDENCE_THRESHOLD = 0.50
+CONFIDENCE_THRESHOLD = 0.60
 
 CLASS_CONFIDENCE_THRESHOLDS: dict[str, float] = {
-    "Hardhat":         0.50,
-    "Safety Vest":     0.50,
-    "NO-Hardhat":      0.50,
-    "NO-Safety Vest":  0.50,
+    "Hardhat":         0.60,
+    "Safety Vest":     0.60,
+    "NO-Hardhat":      0.65,
+    "NO-Safety Vest":  0.65,
 }
 
 # --- EKRANDA GÖZÜKECEK TÜRKÇE SINIF İSİMLERİ ---
