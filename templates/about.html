@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero-text">
+    <h1>Sistem Hakkında</h1>
+</div>
+
+<div style="max-width: 800px; background: var(--card-bg); border: 4px solid var(--border-color); padding: 30px; box-shadow: 8px 8px 0px var(--shadow-color);">
+    <h2 style="border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">Mimari İşleyiş</h2>
+    <p>Bu proje, Flask sunucu mimarisi ve Ultralytics YOLO (You Only Look Once) derin öğrenme modellerini kullanarak geliştirilmiştir. Kamera veya önceden kaydedilmiş video akışlarından alınan kareler (frameler), özel eğitilmiş yapay zeka modeline beslenir.</p>
+    <p>ByteTrack algoritması sayesinde tespit edilen nesneler id atanarak takip edilir (tracking), böylece titreşimler ve hatalı loglamalar önlenir. İhlal gerçekleştiğinde sistem, işletim sistemi üzerinde o anın fotoğrafını kaydeder ve CSV tabanlı hafif bir veritabanına log düşer.</p>
+    
+    <div style="margin-top: 20px; margin-bottom: 30px;">
+        <a href="https://github.com/tunahantarhan/cv-ppe-detection-project" target="_blank" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px; text-transform: none;">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+            Repository
+        </a>
+    </div>
+
+    <h2 style="border-bottom: 4px solid var(--border-color); padding-bottom: 10px; margin-top: 40px; text-transform: uppercase;">Model Performansı</h2>
+    
+    <div style="margin-top: 20px; width: 100%;">
+        
+        <h3 style="font-size: 18px; font-style: italic; text-decoration: underline; font-weight: normal; margin-bottom: 15px; color: var(--text-color);">Confusion Matrix</h3>
+        
+        <img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" alt="Confusion Matrix" 
+             style="width: 100%; border: 3px dashed var(--border-color); padding: 15px; cursor: pointer; transition: transform 0.1s ease;" 
+             onclick="openEvidenceModal(this.src, 'confusion_matrix.png')" 
+             onmouseover="this.style.transform='translate(-2px, -2px)'" 
+             onmouseout="this.style.transform='translate(0, 0)'">
+
+        <h3 style="font-size: 18px; font-style: italic; text-decoration: underline; font-weight: normal; margin-top: 40px; margin-bottom: 15px; color: var(--text-color);">Genel Sonuçlar</h3>
+        
+        <img src="{{ url_for('static', filename='images/results.png') }}" alt="Genel Sonuçlar" 
+             style="width: 100%; border: 3px dashed var(--border-color); padding: 15px; cursor: pointer; transition: transform 0.1s ease;" 
+             onclick="openEvidenceModal(this.src, 'results.png')" 
+             onmouseover="this.style.transform='translate(-2px, -2px)'" 
+             onmouseout="this.style.transform='translate(0, 0)'">
+             
+    </div>
+
+    <h2 style="border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-top: 50px; text-transform: uppercase;">Geliştirici</h2>
+    <div style="display: flex; gap: 25px; align-items: center; margin-top: 20px; flex-wrap: wrap; background: var(--bg-color); padding: 20px; border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--shadow-color);">
+        
+        <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Tunahan Tarhan" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border-color); object-fit: cover; box-shadow: 4px 4px 0px var(--border-color);">
+        
+        <div style="flex: 1;">
+            <h3 style="margin: 0 0 10px 0; font-size: 24px;">Tunahan TARHAN</h3>
+            <p style="margin: 0 0 20px 0; font-weight: bold; color: #8b949e;">
+                Kocaeli Üniversitesi | Bilişim Sistemleri Mühendisliği <br>
+                <br>
+                <span style="font-size: 14px; font-weight: normal;">Bu proje; Kocaeli Üniversitesi Teknoloji Fakültesi, Bilişim Sistemleri Mühendisliği bitirme projesi kapsamında 2026 yılı Bahar döneminde geliştirilmiştir. Proje geliştiricisi olarak ilgi alanlarım arasında Yapay Zeka, Makine Öğrenmesi ve Web Teknolojileri bulunmaktadır.</span>
+            </p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="https://github.com/tunahantarhan" target="_blank" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px; text-transform: none;">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/tunahan-tarhan" target="_blank" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px; text-transform: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="evidenceModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <button class="btn btn-danger" onclick="closeEvidenceModal()" style="float: right; margin-bottom: 15px;">X</button>
+        <div style="clear: both;"></div>
+        <img id="fullImg" style="width: 100%; border: 4px solid var(--border-color);">
+    </div>
+</div>
+
+{% endblock %}

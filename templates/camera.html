@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero-text">
+    <h1>Canlı Kontrol</h1>
+    <p>Kameranızı açarak gerçek zamanlı tespit motorunu başlatın.</p>
+</div>
+
+<div style="width: 100%; max-width: 800px; text-align: center; border: 4px solid var(--border-color); padding: 20px; background: var(--card-bg); box-shadow: 8px 8px 0px var(--shadow-color);">
+    <button id="cam-btn" class="btn btn-primary" onclick="toggleCamera()" style="margin-bottom: 20px;">Kamerayı Başlat</button>
+    <img id="camera-feed" class="video-feed" src="" alt="Kamera Kapalı" style="display: none; background-color: #000; min-height: 400px;">
+</div>
+{% endblock %}

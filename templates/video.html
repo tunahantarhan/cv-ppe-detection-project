@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero-text">
+    <h1>Görüntü Üzerinden Kontrol</h1>
+</div>
+
+<div class="video-layout-fixed" style="display: flex; gap: 40px; width: 100%; max-width: 1200px; justify-content: center;">
+    
+    <div style="flex: 3; background: var(--card-bg); border: 4px solid var(--border-color); padding: 30px; box-shadow: 8px 8px 0px var(--shadow-color); min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        
+        <div id="upload-controls" style="text-align: center; width: 100%;">
+            <h2 style="margin-top: 0; text-transform: uppercase;">Sisteme Video Yükleyin</h2>
+            <p style="color: var(--text-color); margin-bottom: 20px;">Lokal cihazınızdan bir şantiye kaydı (MP4, AVI, MOV) seçin ve analiz motorunu başlatın.</p>
+            
+            <input type="file" id="video-file" accept=".mp4,.avi,.mov" class="neo-input" style="margin-bottom: 15px; width: 80%; max-width: 400px;">
+            <br>
+            <button class="btn btn-primary" onclick="uploadAndPlay()" style="width: 80%; max-width: 400px;">Yükle ve İşle</button>
+            <p style="font-size: 13px; color: var(--isg-red); margin-top: 10px; font-weight: bold;">*Maksimum dosya boyutu: 50 MB</p>
+
+            <div style="margin-top: 30px; border-top: 4px solid var(--border-color); padding-top: 20px; width: 100%;">
+                <h3 style="margin-top: 0; font-size: 16px; text-transform: uppercase;">Geçmiş Yüklemeleriniz</h3>
+                <div id="past-uploads-list" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 15px;">
+                    {% if uploaded_videos %}
+                        {% for video in uploaded_videos %}
+                        <button class="btn" style="font-size: 12px; padding: 8px 12px;" onclick="startVideo('upload', '{{ video }}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            {{ video }}
+                        </button>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size: 13px; color: #8b949e; margin: 0;">Henüz yüklenmiş bir video bulunmuyor.</p>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+
+        <div id="video-player-area" style="display: none; width: 100%; position: relative;">
+            <button class="btn btn-danger" onclick="stopVideo()" style="position: absolute; top: -20px; right: -20px; z-index: 10;">X</button>
+            <img id="test-video-feed" class="video-feed" src="" alt="Yapay Zeka Analiz Ediyor..." style="width: 100%; border: 4px solid var(--border-color);">
+        </div>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+        <div style="background: var(--isg-yellow); border: 4px solid var(--border-color); padding: 10px; text-align: center; color: #111;">
+            <h3 style="margin: 0; text-transform: uppercase; font-size: 18px;">Örnek Videolar</h3>
+        </div>
+        <button class="btn" onclick="startVideo('test', 'test_video_01.mov')">Örnek Video 1</button>
+        <button class="btn" onclick="startVideo('test', 'test_video_02.mov')">Örnek Video 2</button>
+        <button class="btn" onclick="startVideo('test', 'test_video_03.mov')">Örnek Video 3</button>
+    </div>
+
+</div>
+{% endblock %}
